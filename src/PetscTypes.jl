@@ -1,3 +1,5 @@
+# Note: some definitions in this file come from PETSc.jl
+
 typealias PetscErrorCode Cint
 typealias comm_type MPI.CComm
 
@@ -5,12 +7,19 @@ typealias Mat Ptr{Void}
 
 typealias PetscViewer Ptr{Void}
 
+typealias PetscInt Int32
+typealias PetscScalar Float64
+
 const PETSC_NULL = C_NULL
 const PETSC_IGNORE = C_NULL
 const PETSC_DECIDE = -1
 const PETSC_DETERMINE = PETSC_DECIDE
 const PETSC_DEFAULT = -2
 
+typealias MatType Ptr{UInt8}
+const MATAIJ = "aij"
+
+typealias MatAssemblyType UInt32
 const MAT_FINAL_ASSEMBLY = (UInt32)(0)
 
 typealias InsertMode UInt32

@@ -170,6 +170,21 @@ function getindex(mat::PetscMat, I)
 end
 
 """
+    Proper getter for entries from the matrix for integer indices
+"""
+function getindex{T<:Integer}(mat::PetscMat, i::T, j::T)
+    # Don't forget about 1-based indexing...
+    i_ind = (PetscInt)[i-1]
+    j_ind = (PetscInt)[j-1]
+
+    get_vals = Array{Float64}(1)
+
+    ccall((:MatGetValues, library), PetscErrorCode, (Mat, PetscInt, Ptr{PetscInt}, PetscInt, Ptr{PetscInt}, Ref{PetscScalar}), mat.mat[], 1, i_ind, 1, j_ind, get_vals)
+
+    return get_vals[1]
+end
+
+"""
     Proper getter for entries from the matrix
 """
 function getindex(mat::PetscMat, i, j)

@@ -12,9 +12,9 @@ typealias PetscScalar Float64
 
 const PETSC_NULL = C_NULL
 const PETSC_IGNORE = C_NULL
-const PETSC_DECIDE = -1
+const PETSC_DECIDE = (Int32)(-1)
 const PETSC_DETERMINE = PETSC_DECIDE
-const PETSC_DEFAULT = -2
+const PETSC_DEFAULT = (Int32)(-2)
 
 typealias MatType Ptr{UInt8}
 const MATAIJ = "aij"

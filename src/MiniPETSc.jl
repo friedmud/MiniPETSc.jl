@@ -15,5 +15,6 @@ export PetscMat
 export setSize!
 export setPreallocation!
 export assemble!
+export viewMat
 
 end

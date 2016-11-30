@@ -12,11 +12,14 @@ type PetscMat <: AbstractMatrix{PetscScalar}
     " Whether or not preallocation has been done by calling setPreallocation() "
     preallocated::Bool
 
+    " Whether or not the matrix has ever been assembled (Note: the matrix might currently NOT be assembled) "
+    assembled::Bool
+
     function PetscMat()
         mat = Ref{Mat}()
         ccall((:MatCreate, library), PetscErrorCode, (comm_type, Ref{Mat}), MPI.COMM_WORLD, mat)
         ccall((:MatSetType, library), PetscErrorCode, (Mat, MatType), mat[], MATAIJ)
-        new(mat, false, false)
+        new(mat, false, false, false)
     end
 end
 
@@ -64,6 +67,20 @@ function assemble!(mat::PetscMat)
 
     ccall((:MatAssemblyBegin, library), PetscErrorCode, (Mat, MatAssemblyType), mat.mat[], MAT_FINAL_ASSEMBLY)
     ccall((:MatAssemblyEnd, library), PetscErrorCode, (Mat, MatAssemblyType), mat.mat[], MAT_FINAL_ASSEMBLY)
+
+    mat.assembled = true
+end
+
+"""
+    Use PETSc viewer to print out the matrix
+"""
+function viewMat(mat::PetscMat)
+    @assert mat.sized
+    @assert mat.preallocated
+    @assert mat.assembled
+
+    viewer = ccall((:PETSC_VIEWER_STDOUT_, library), PetscViewer, (comm_type,), MPI.COMM_WORLD)
+    ccall((:MatView, library), PetscErrorCode, (Mat, PetscViewer), mat.mat[], viewer)
 end
 
 #### AbstractArray Interface Definitions ###
@@ -74,6 +91,7 @@ import Base.linearindexing
     PETSc Matrices are inherently 2D
 """
 function linearindexing(mat::PetscMat)
+    println("linearindexing(mat::PetscMat)")
     return Base.LinearSlow()
 end
 
@@ -88,7 +106,7 @@ function size(mat::PetscMat)
 
     ccall((:MatGetSize, library), PetscErrorCode, (Mat, Ref{PetscInt}, Ref{PetscInt}), mat.mat[], M, N)
 
-    return (M, N)
+    return (M[], N[])
 end
 
 import Base.setindex!
@@ -107,14 +125,26 @@ function setindex!(mat::PetscMat, v, i, j)
 end
 
 """
+    Sets a matrix into the larger matrix
+"""
+function setindex!(mat::PetscMat, v::Matrix{Float64}, i, j)
+    println("setindex!(mat::PetscMat, v::Matrix{Float64}, i, j)")
+
+    # TODO: do the transpose faster (with loops so there are less copies
+    # The transpose is to go from column-major to row-major
+    v_T = reshape(v', length(v))
+
+    # Call the specialization below
+    setindex!(mat, v_T, i, j)
+end
+
+"""
     Sets the value at i,j.
 
     Specialization for when v is already an array of Float64 (faster because we don't need to copy it)
 """
 function setindex!(mat::PetscMat, v::Array{Float64}, i, j)
-    println("setindex!(mat::PetscMat, v::Array{Float64}, i, j)")
-
-    # Convert the indices to 0-based indexing
+    # Convert the indices to 0-based indexing and flip them for row-major
     i_ind = (PetscInt)[i_val-1 for i_val in i]
     j_ind = (PetscInt)[j_val-1 for j_val in j]
 
@@ -139,13 +169,16 @@ function getindex(mat::PetscMat, I)
     error("Attempt to index PetscMatrix using a single dimension!")
 end
 
-#m = Ref{PetscInt}(0)
-#n = Ref{PetscInt}(0)
+"""
+    Proper getter for entries from the matrix
+"""
+function getindex(mat::PetscMat, i, j)
+    i_ind = (PetscInt)[i_val-1 for i_val in i]
+    j_ind = (PetscInt)[j_val-1 for j_val in j]
 
-#ccall((:MatGetLocalSize, library), PetscErrorCode, (Mat, Ref{PetscInt}, Ref{PetscInt}), mat[], m, n)
+    get_vals = Array{Float64}(length(i_ind) * length(j_ind))
 
+    ccall((:MatGetValues, library), PetscErrorCode, (Mat, PetscInt, Ptr{PetscInt}, PetscInt, Ptr{PetscInt}, Ref{PetscScalar}), mat.mat[], length(i_ind), i_ind, length(j_ind), j_ind, get_vals)
 
-#ccall((:MatSetValue, library), PetscErrorCode, (Mat, PetscInt, PetscInt, Float64, InsertMode), mat[], 0, 0, 1, INSERT_VALUES)
-
-#viewer = ccall((:PETSC_VIEWER_STDOUT_, library), PetscViewer, (comm_type,), MPI.COMM_WORLD)
-#ccall((:MatView, library), PetscErrorCode, (Mat, PetscViewer), mat[], viewer)
+    return reshape(get_vals, length(j_ind), length(i_ind))'
+end

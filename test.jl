@@ -1,21 +1,15 @@
 using MiniPETSc
 
-mat = PetscMat()
+vec = PetscVec()
 
-setSize!(mat, m_local=(Int32)(3), n_local=(Int32)(3))
+setSize!(vec, n_local=(Int32)(3))
 
-setPreallocation!(mat, (Int32)[3, 3, 2], (Int32)[])
+vec[2] = 3.2
 
-local_mat = (Float64)[1 2; 3 4; 5 6]
+assemble!(vec)
 
-#mat[1,2] = 4
-#mat[1:2, 1:2] = [3,3,4,5]
-#mat[(Int32)[1,2], (Int32)[1,2]] = (Float64)[3,3,4,5]
+viewVec(vec)
 
-mat[1:3, 1:2] = local_mat
+println(vec[2])
 
-assemble!(mat)
-
-viewMat(mat)
-
-println(mat[1:3,1:2])
+println(vec[1:2])

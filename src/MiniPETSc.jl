@@ -10,11 +10,16 @@ include("PetscTypes.jl")
 ccall((:PetscInitializeNoArguments, library), PetscErrorCode, ())
 
 include("Mat.jl")
-
 export PetscMat
 export setSize!
 export setPreallocation!
 export assemble!
 export viewMat
+
+include("Vec.jl")
+export PetscVec
+export setSize!
+export assemble!
+export viewVec
 
 end

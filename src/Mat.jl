@@ -91,7 +91,6 @@ import Base.linearindexing
     PETSc Matrices are inherently 2D
 """
 function linearindexing(mat::PetscMat)
-    println("linearindexing(mat::PetscMat)")
     return Base.LinearSlow()
 end
 
@@ -115,8 +114,6 @@ import Base.setindex!
     Sets the value at i,j
 """
 function setindex!(mat::PetscMat, v, i, j)
-    println("setindex!(mat::PetscMat, v, i, j)")
-
     # Copy out the values
     val = (Float64)[v_val for v_val in v]
 
@@ -128,8 +125,6 @@ end
     Sets a matrix into the larger matrix
 """
 function setindex!(mat::PetscMat, v::Matrix{Float64}, i, j)
-    println("setindex!(mat::PetscMat, v::Matrix{Float64}, i, j)")
-
     # TODO: do the transpose faster (with loops so there are less copies
     # The transpose is to go from column-major to row-major
     v_T = reshape(v', length(v))

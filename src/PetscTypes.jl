@@ -31,3 +31,8 @@ const INSERT_ALL_VALUES = (UInt32)(4)
 const ADD_ALL_VALUES = (UInt32)(5)
 const INSERT_BC_VALUES = (UInt32)(6)
 const ADD_BC_VALUES = (UInt32)(7)
+
+
+typealias Vec Ptr{Void}
+typealias VecType Ptr{UInt8}
+const VECMPI = "mpi"

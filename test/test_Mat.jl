@@ -1,4 +1,4 @@
-@testset "PetscMat.jl" begin
+@testset "Mat.jl" begin
     begin
         mat = PetscMat()
 

@@ -52,3 +52,11 @@ println(m[], ", ", n[])
 viewer = ccall((:PETSC_VIEWER_STDOUT_, library), PetscViewer, (comm_type,), MPI.COMM_WORLD)
 
 ccall((:MatView, library), PetscErrorCode, (Mat, PetscViewer), mat[], viewer)
+
+get_m = (PetscInt)[1, 2]
+get_n = (PetscInt)[1, 2]
+get_vals = Array{Float64}(4)
+
+ccall((:MatGetValues, library), PetscErrorCode, (Mat, PetscInt, Ptr{PetscInt}, PetscInt, Ptr{PetscInt}, Ref{PetscScalar}), mat[], length(get_m), get_m, length(get_n), get_n, get_vals)
+
+println(get_vals)

@@ -5,7 +5,7 @@
         setSize!(mat, m_local=(Int32)(3), n_local=(Int32)(4))
         @test mat.sized
 
-        setPreallocation!(mat, (Int32)[3, 3, 2], (Int32)[])
+        setPreallocation!(mat, (Int32)[3, 3, 2], (Int32)[0,0,0])
         @test mat.preallocated
 
         # Test individual assignment
@@ -24,7 +24,7 @@
         setSize!(mat, m_local=(Int32)(3), n_local=(Int32)(4))
         @test mat.sized
 
-        setPreallocation!(mat, (Int32)[3, 3, 2], (Int32)[])
+        setPreallocation!(mat, (Int32)[3, 3, 2], (Int32)[0,0,0])
         @test mat.preallocated
 
         # Test range assignment
@@ -42,7 +42,7 @@
         setSize!(mat, m_local=(Int32)(3), n_local=(Int32)(4))
         @test mat.sized
 
-        setPreallocation!(mat, (Int32)[3, 3, 2], (Int32)[])
+        setPreallocation!(mat, (Int32)[3, 3, 2], (Int32)[0,0,0])
         @test mat.preallocated
 
         # Test Matrix Assignment

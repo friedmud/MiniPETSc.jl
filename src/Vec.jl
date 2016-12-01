@@ -59,6 +59,17 @@ function viewVec(vec::PetscVec)
     ccall((:VecView, library), PetscErrorCode, (Vec, PetscViewer), vec.vec[], viewer)
 end
 
+"""
+    Does vec[i] += v
+"""
+function plusEquals!(vec::PetscVec, v::Array{Float64}, i)
+    i_ind = (PetscInt)[i_val-1 for i_val in i]
+
+    @assert length(v) == length(i_ind)
+
+    ccall((:VecSetValues, library), PetscErrorCode, (Vec, PetscInt, Ptr{PetscInt}, Ptr{PetscScalar}, InsertMode), vec.vec[], length(i_ind), i_ind, v, ADD_VALUES)
+end
+
 #### AbstractArray Interface Definitions ###
 
 import Base.linearindexing

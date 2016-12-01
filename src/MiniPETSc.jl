@@ -25,6 +25,7 @@ export PetscVec
 export setSize!
 export assemble!
 export viewVec
+export plusEquals!
 
 include("KSP.jl")
 export PetscKSP

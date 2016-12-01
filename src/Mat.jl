@@ -48,6 +48,9 @@ function setPreallocation!(mat::PetscMat, local_nonzeros_per_row::Array{PetscInt
     @assert mat.sized
     @assert !mat.preallocated
 
+    ccall((:MatSeqAIJSetPreallocation, library), PetscErrorCode, (Mat, PetscInt, Ptr{PetscInt}),
+          mat.mat[], PETSC_DEFAULT, local_nonzeros_per_row)
+
     ccall((:MatMPIAIJSetPreallocation, library), PetscErrorCode, (Mat, PetscInt, Ptr{PetscInt}, PetscInt, Ptr{PetscInt}),
           mat.mat[], PETSC_DEFAULT, local_nonzeros_per_row, PETSC_DEFAULT, off_processor_nonzeros_per_row)
 

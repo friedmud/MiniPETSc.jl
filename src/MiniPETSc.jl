@@ -22,4 +22,9 @@ export setSize!
 export assemble!
 export viewVec
 
+include("KSP.jl")
+export PetscKSP
+export setOperators
+export solve!
+
 end

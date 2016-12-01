@@ -1,7 +1,9 @@
 
 module MiniPETSc
 
-using MPI
+using Reexport
+
+@reexport using MPI
 
 const library = "/opt/moose/petsc/mpich_petsc-3.6.1/clang-opt-superlu/lib/libpetsc"
 

@@ -48,10 +48,6 @@ function setPreallocation!(mat::PetscMat, local_nonzeros_per_row::Array{PetscInt
     @assert mat.sized
     @assert !mat.preallocated
 
-    # The preallocation is done for both serial _and_ parallel to make this capable of doing both (this is the suggestion in the PETSc docs)
-    ccall((:MatSeqAIJSetPreallocation, library), PetscErrorCode, (Mat, PetscInt, Ptr{PetscInt}),
-          mat.mat[], PETSC_DEFAULT, local_nonzeros_per_row)
-
     ccall((:MatMPIAIJSetPreallocation, library), PetscErrorCode, (Mat, PetscInt, Ptr{PetscInt}, PetscInt, Ptr{PetscInt}),
           mat.mat[], PETSC_DEFAULT, local_nonzeros_per_row, PETSC_DEFAULT, off_processor_nonzeros_per_row)
 

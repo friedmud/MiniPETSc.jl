@@ -7,7 +7,9 @@ const library = "/opt/moose/petsc/mpich_petsc-3.6.1/clang-opt-superlu/lib/libpet
 
 include("PetscTypes.jl")
 
-ccall((:PetscInitializeNoArguments, library), PetscErrorCode, ())
+args = vcat("julia", ARGS)
+nargs = length(args)
+ccall((:PetscInitializeNoPointers, library), PetscErrorCode, (Cint, Ptr{Ptr{UInt8}}, Cstring, Cstring), nargs, args, C_NULL, C_NULL)
 
 include("Mat.jl")
 export PetscMat

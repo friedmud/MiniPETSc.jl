@@ -82,6 +82,24 @@ function viewMat(mat::PetscMat)
     ccall((:MatView, library), PetscErrorCode, (Mat, PetscViewer), mat.mat[], viewer)
 end
 
+"""
+    mat[i,j] += v
+"""
+function plusEquals!(mat::PetscMat, v::Matrix{Float64}, i, j)
+    # TODO: do the transpose faster (with loops so there are less copies
+    # The transpose is to go from column-major to row-major
+    v_T = reshape(v', length(v))
+
+    # Convert the indices to 0-based indexing and flip them for row-major
+    i_ind = (PetscInt)[i_val-1 for i_val in i]
+    j_ind = (PetscInt)[j_val-1 for j_val in j]
+
+    @assert length(v_T) == length(i_ind) * length(j_ind)
+
+    ccall((:MatSetValues, library), PetscErrorCode, (Mat, PetscInt, Ptr{PetscInt}, PetscInt, Ptr{PetscInt}, Ptr{PetscScalar}, InsertMode), mat.mat[], length(i_ind), i_ind, length(j_ind), j_ind, v_T, ADD_VALUES)
+end
+
+
 #### AbstractArray Interface Definitions ###
 
 import Base.linearindexing

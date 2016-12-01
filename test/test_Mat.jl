@@ -45,12 +45,12 @@
         setPreallocation!(mat, (Int32)[3, 3, 2], (Int32)[0,0,0])
         @test mat.preallocated
 
-        # Test Matrix Assignment
         mat[[1,3],[2,3]] = (Float64)[1 2; 3 4]
-
         assemble!(mat)
 
-        @test size(mat) == (3,4)
-        @test mat[1:3,2:3] == (Float64)[1 2; 0 0; 3 4]
+        plusEquals!(mat, (Float64)[2 3; 4 5], (Int32)[1,3], (Int32)[2,3])
+        assemble!(mat)
+
+        @test mat[1:3,2:3] == (Float64)[3 5; 0 0; 7 9]
     end
 end

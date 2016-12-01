@@ -53,6 +53,7 @@
 
         # Test +=
         plusEquals!(vec, (Float64)[2, 3, 4], (Int32)[1,2,3])
+        assemble!(vec)
 
         @test vec[1:3] == (Float64)[3, 5, 7]
     end

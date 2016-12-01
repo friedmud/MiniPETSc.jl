@@ -90,7 +90,7 @@ function plusEquals!(mat::PetscMat, v::Matrix{Float64}, i, j)
     # The transpose is to go from column-major to row-major
     v_T = reshape(v', length(v))
 
-    # Convert the indices to 0-based indexing and flip them for row-major
+    # Convert the indices to 0-based indexing
     i_ind = (PetscInt)[i_val-1 for i_val in i]
     j_ind = (PetscInt)[j_val-1 for j_val in j]
 
@@ -154,6 +154,8 @@ end
     Sets the value at i,j.
 
     Specialization for when v is already an array of Float64 (faster because we don't need to copy it)
+
+    HUGE NOTE!!!  This assumes that `v` is already laid out _row-major_.  If that's not true call one of the above functions...
 """
 function setindex!(mat::PetscMat, v::Array{Float64}, i, j)
     # Convert the indices to 0-based indexing and flip them for row-major

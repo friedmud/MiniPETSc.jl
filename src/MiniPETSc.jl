@@ -10,27 +10,39 @@ const library = "/opt/moose/petsc/mpich_petsc-3.6.1/clang-opt-superlu/lib/libpet
 
 include("PetscTypes.jl")
 
-args = vcat("julia", ARGS)
-nargs = length(args)
-ccall((:PetscInitializeNoPointers, library), PetscErrorCode, (Cint, Ptr{Ptr{UInt8}}, Cstring, Cstring), nargs, args, C_NULL, C_NULL)
+function __init__()
+    args = vcat("julia", ARGS)
+    nargs = length(args)
+    ccall((:PetscInitializeNoPointers, library), PetscErrorCode, (Cint, Ptr{Ptr{UInt8}}, Cstring, Cstring), nargs, args, C_NULL, C_NULL)
+end
 
-include("Mat.jl")
 export PetscMat
 export setSize!
 export setPreallocation!
 export assemble!
 export viewMat
+export zero!
+export zeroRows!
 
-include("Vec.jl")
 export PetscVec
 export setSize!
 export assemble!
 export viewVec
 export plusEquals!
+export zero!
 
-include("KSP.jl")
+import Base.scale!
+
+export scale!
+
 export PetscKSP
 export setOperators
 export solve!
+
+
+include("Mat.jl")
+include("Vec.jl")
+include("KSP.jl")
+
 
 end

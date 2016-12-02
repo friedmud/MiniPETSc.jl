@@ -70,6 +70,20 @@ function plusEquals!(vec::PetscVec, v::Array{Float64}, i)
     ccall((:VecSetValues, library), PetscErrorCode, (Vec, PetscInt, Ptr{PetscInt}, Ptr{PetscScalar}, InsertMode), vec.vec[], length(i_ind), i_ind, v, ADD_VALUES)
 end
 
+"""
+    vec = 0
+"""
+function zero!(vec::PetscVec)
+    ccall((:VecZeroEntries, library), PetscErrorCode, (Vec,), vec.vec[])
+end
+
+"""
+    vec = a*vec
+"""
+function scale!(vec::PetscVec, a::PetscScalar)
+    ccall((:VecScale, library), PetscErrorCode, (Vec, PetscScalar), vec.vec[], a)
+end
+
 #### AbstractArray Interface Definitions ###
 
 import Base.linearindexing

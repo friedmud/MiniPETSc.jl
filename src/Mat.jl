@@ -99,6 +99,21 @@ function plusEquals!(mat::PetscMat, v::Matrix{Float64}, i, j)
     ccall((:MatSetValues, library), PetscErrorCode, (Mat, PetscInt, Ptr{PetscInt}, PetscInt, Ptr{PetscInt}, Ptr{PetscScalar}, InsertMode), mat.mat[], length(i_ind), i_ind, length(j_ind), j_ind, v_T, ADD_VALUES)
 end
 
+"""
+    mat = 0
+"""
+function zero!(mat::PetscMat)
+    ccall((:MatZeroEntries, library), PetscErrorCode, (Mat,), mat.mat[])
+end
+
+"""
+    Zeros rows
+"""
+function zeroRows!(mat::PetscMat, i::Array{PetscInt})
+    rows = (PetscInt)[i_ind-1 for i_ind in i]
+    ccall((:MatSetOption, library), PetscErrorCode, (Mat, MatOption, PetscBool), mat.mat[], MAT_KEEP_NONZERO_PATTERN, PETSC_TRUE)
+    ccall((:MatZeroRows, library), PetscErrorCode, (Mat, PetscInt, Ptr{PetscInt}, PetscScalar, Vec, Vec), mat.mat[], length(rows), rows, 0., C_NULL, C_NULL)
+end
 
 #### AbstractArray Interface Definitions ###
 

@@ -7,6 +7,7 @@ type PetscKSP
     function PetscKSP()
         ksp = Ref{KSP}()
         ccall((:KSPCreate, library), PetscErrorCode, (comm_type, Ref{KSP}), MPI.COMM_WORLD, ksp)
+        ccall((:KSPSetFromOptions, library), PetscErrorCode, (KSP,), ksp[])
         new(ksp)
     end
 end

@@ -84,6 +84,15 @@ end
 
 """
     mat[i,j] += v
+
+    If the values coming in aren't Floats then we need to make them so
+"""
+function plusEquals!{T}(mat::PetscMat, v::Matrix{T}, i, j)
+    plusEquals!(mat, float(v), i, j)
+end
+
+"""
+    mat[i,j] += v
 """
 function plusEquals!(mat::PetscMat, v::Matrix{Float64}, i, j)
     # TODO: do the transpose faster (with loops so there are less copies
@@ -109,7 +118,7 @@ end
 """
     Zeros rows
 """
-function zeroRows!(mat::PetscMat, i::Array{PetscInt})
+function zeroRows!(mat::PetscMat, i)
     rows = (PetscInt)[i_ind-1 for i_ind in i]
     ccall((:MatSetOption, library), PetscErrorCode, (Mat, MatOption, PetscBool), mat.mat[], MAT_KEEP_NONZERO_PATTERN, PETSC_TRUE)
     ccall((:MatZeroRows, library), PetscErrorCode, (Mat, PetscInt, Ptr{PetscInt}, PetscScalar, Vec, Vec), mat.mat[], length(rows), rows, 0., C_NULL, C_NULL)

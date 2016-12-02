@@ -71,6 +71,16 @@ function plusEquals!(vec::PetscVec, v::Array{Float64}, i)
 end
 
 """
+    If the incoming type is not a float, make it so
+
+    Does vec[i] += v
+"""
+function plusEquals!{T}(vec::PetscVec, v::Array{T}, i)
+    plusEquals!(vec, (Float64)[(Float64)(val) for val in v], i)
+end
+
+
+"""
     vec = 0
 """
 function zero!(vec::PetscVec)

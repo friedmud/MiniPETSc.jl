@@ -2,9 +2,7 @@ __precompile__()
 
 module MiniPETSc
 
-using Reexport
-
-@reexport using MPI
+using MPI
 
 const library = "/opt/moose/petsc/mpich_petsc-3.6.1/clang-opt-superlu/lib/libpetsc"
 
@@ -15,6 +13,9 @@ function __init__()
     nargs = length(args)
     ccall((:PetscInitializeNoPointers, library), PetscErrorCode, (Cint, Ptr{Ptr{UInt8}}, Cstring, Cstring), nargs, args, C_NULL, C_NULL)
 end
+
+# Cleanup at the end
+atexit(() -> ccall((:PetscFinalize, library), PetscErrorCode, ()))
 
 export PetscMat
 export setSize!

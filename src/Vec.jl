@@ -90,8 +90,8 @@ end
 """
     vec = a*vec
 """
-function scale!(vec::PetscVec, a::PetscScalar)
-    ccall((:VecScale, library), PetscErrorCode, (Vec, PetscScalar), vec.vec[], a)
+function scale!(vec::PetscVec, a::Real)
+    ccall((:VecScale, library), PetscErrorCode, (Vec, PetscScalar), vec.vec[], (PetscScalar)(a))
 end
 
 #### AbstractArray Interface Definitions ###

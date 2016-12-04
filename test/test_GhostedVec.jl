@@ -2,22 +2,24 @@
     begin
         if MPI.Comm_size(MPI.COMM_WORLD) == 2
             if MPI.Comm_rank(MPI.COMM_WORLD) == 0
-                vec = GhostedPetscVec([4,5], n_local=(Int32)(4))
+                vec = GhostedPetscVec([6,7], n_local=(Int32)(4))
                 @test vec.first_local_index == 1
                 @test vec.last_local_index == 4
 
-                @test vec.global_to_local_map == Dict{Int32, Int32}(4 => 5, 5 => 6)
+                @test vec.global_to_local_map == Dict{Int32, Int32}(6 => 5, 7 => 6)
 
                 @test vec.sized
 
                 # # Test individual assignment
-                vec[2] = 1.2
+                vec[2] = 2.6
 
                 assemble!(vec)
 
                 @test size(vec) == 8
 
-                @test vec[2] == 1.2
+                @test vec[2] == 2.6
+
+                @test vec[6] == 1.2
             else
                 vec = GhostedPetscVec([1,2], n_local=(Int32)(4))
 
@@ -36,6 +38,8 @@
                 @test size(vec) == 8
 
                 @test vec[6] == 1.2
+
+                @test vec[2] == 2.6
             end
         end
 

@@ -52,6 +52,9 @@ type GhostedPetscVec <: PetscVecBase
     " The raw local array.  This shouldn't be accessed directly!  Use [] to access values. (1-based)"
     raw_array::Array{PetscScalar}
 
+    " The local form.  Only present if the raw_array is.  Only for internal use!"
+    local_form::PetscVec
+
     function GhostedPetscVec{T}(ghosts::Array{T};
                                 n_local::PetscInt=PETSC_DECIDE, n_global::PetscInt=PETSC_DETERMINE)
         vec = Ref{Vec}()
@@ -357,13 +360,14 @@ end
 """
 function _getindices(vec::GhostedPetscVec, indices)
     raw_indices = Array{PetscInt}(length(indices))
+    println("indices: ", indices)
 
     for i in 1:length(indices)
         index = indices[i]
         if vec.first_local_index <= index && index <= vec.last_local_index # Within the local portion of the vector
             raw_indices[i] = (index - vec.first_local_index) + 1
         else # Within the ghosted part
-            raw_indices[i] = vec.raw_array[vec.global_to_local_map[index]]
+            raw_indices = vec.global_to_local_map[index]
         end
     end
 
@@ -378,7 +382,7 @@ function getindex{T<:Integer}(vec::GhostedPetscVec, i::T)
         _getArray(vec)
     end
 
-    return vec.raw_array[_getindices(vec, [i])[1]]
+    return vec.raw_array[_getindices(vec, (PetscInt)[i])[1]]
 end
 
 """
@@ -412,13 +416,12 @@ end
 """
 function _getArray(vec::GhostedPetscVec)
     if !vec.raw_array_present
-        raw_data = Ref{Ptr{PetscScalar}}()
-        ccall((:VecGetArray, library), PetscErrorCode, (Vec, Ref{Ptr{PetscScalar}}), vec.vec[], raw_data)
+        vec.local_form = PetscVec()
+        ccall((:VecGhostGetLocalForm, library), PetscErrorCode, (Vec, Ref{Vec}), vec.vec[], vec.local_form.vec)
 
-        local_size = Ref{PetscInt}()
-        ccall((:VecGetLocalSize, library), PetscErrorCode, (Vec, Ref{PetscInt}), vec.vec[], local_size)
+        vec.raw_array = _getArray(vec.local_form)
 
-        vec.raw_array = unsafe_wrap(Array, raw_data[], local_size[], false)
+        println(vec.raw_array)
         vec.raw_array_present = true
     end
 
@@ -437,7 +440,8 @@ end
 """
 function _restoreArray(vec::GhostedPetscVec)
     if vec.raw_array_present
-        _restoreArray(vec, vec.raw_array)
+        _restoreArray(vec.local_form, vec.raw_array)
+        ccall((:VecGhostRestoreLocalForm, library), PetscErrorCode, (Vec, Ref{Vec}), vec.vec[], vec.local_form.vec)
         vec.raw_array_present = false
     end
 end

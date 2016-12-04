@@ -360,7 +360,6 @@ end
 """
 function _getindices(vec::GhostedPetscVec, indices)
     raw_indices = Array{PetscInt}(length(indices))
-    println("indices: ", indices)
 
     for i in 1:length(indices)
         index = indices[i]
@@ -421,7 +420,6 @@ function _getArray(vec::GhostedPetscVec)
 
         vec.raw_array = _getArray(vec.local_form)
 
-        println(vec.raw_array)
         vec.raw_array_present = true
     end
 
@@ -432,7 +430,7 @@ end
     PRIVATE: Used internally.  Don't use.
 """
 function _restoreArray(vec::PetscVecBase, raw_data::Array{PetscScalar})
-    ccall((:VecRestoreArray, library), PetscErrorCode, (Vec, Ref{Ptr{PetscScalar}}), vec.vec[], raw_data)
+    ccall((:VecRestoreArray, library), PetscErrorCode, (Vec, Ptr{PetscScalar}), vec.vec[], raw_data)
 end
 
 """

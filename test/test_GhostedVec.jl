@@ -20,6 +20,13 @@
                 @test vec[2] == 2.6
 
                 @test vec[6] == 1.2
+
+                vec[3] = 8.7
+
+                assemble!(vec)
+
+                @test vec[3] == 8.7
+                @test vec[7] == 2.9
             else
                 vec = GhostedPetscVec([1,2], n_local=(Int32)(4))
 
@@ -40,6 +47,12 @@
                 @test vec[6] == 1.2
 
                 @test vec[2] == 2.6
+
+                vec[7] = 2.9
+
+                assemble!(vec)
+
+                @test vec[7] == 2.9
             end
         end
 

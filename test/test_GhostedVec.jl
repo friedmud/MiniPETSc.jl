@@ -77,33 +77,26 @@
 
                 @test vec[6:7] == (Float64)[6,7]
             end
+
+            if MPI.Comm_rank(MPI.COMM_WORLD) == 0
+                vec = GhostedPetscVec([6,7], n_local=(Int32)(4))
+
+                # Test Array assignment
+                vec[[1,3]] = (Float64)[1 3]
+
+                assemble!(vec)
+
+                @test vec[[1,3]] == (Float64)[1,3]
+            else
+                vec = GhostedPetscVec([1,2], n_local=(Int32)(4))
+
+                # Test Array assignment
+                vec[[6,8]] = (Float64)[6 8]
+
+                assemble!(vec)
+
+                @test vec[[6,8]] == (Float64)[6,8]
+            end
         end
     end
-
-
-    # begin
-    #     vec = GhostedPetscVec([], n_local=(Int32)(4))
-
-    #     @test vec.sized
-
-    #     # Test Vector Assignment
-    #     vec[[1,3]] = (Float64)[1 2]
-
-    #     assemble!(vec)
-
-    #     @test size(vec) == (4)
-    #     @test vec[1:3] == (Float64)[1,0,2]
-    # end
-
-    # begin
-    #     vec = GhostedPetscVec([], n_local=(Int32)(3))
-    #     vec[1:3] = (Float64)[1, 2, 3]
-    #     assemble!(vec)
-
-    #     # Test +=
-    #     plusEquals!(vec, (Float64)[2, 3, 4], (Int32)[1,2,3])
-    #     assemble!(vec)
-
-    #     @test vec[1:3] == (Float64)[3, 5, 7]
-    # end
 end

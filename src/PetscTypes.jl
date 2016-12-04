@@ -67,6 +67,12 @@ typealias Vec Ptr{Void}
 typealias VecType Ptr{UInt8}
 const VECMPI = "mpi"
 
+typealias ScatterMode UInt32
+const SCATTER_FORWARD = (UInt32)(0)
+const SCATTER_REVERSE = (UInt32)(1)
+const SCATTER_FORWARD_LOCAL = (UInt32)(2)
+const SCATTER_REVERSE_LOCAL = (UInt32)(3)
+const SCATTER_LOCAL = (UInt32)(2)
 
 typealias KSP Ptr{Void}
 
@@ -105,3 +111,6 @@ const KSPSYMMLQ = "symmlq"
 const KSPLCD = "lcd"
 const KSPPYTHON = "python"
 const KSPGCR = "gcr"
+
+
+typealias ISLocalToGlobalMapping Ptr{Void}

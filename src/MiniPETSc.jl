@@ -26,11 +26,13 @@ export zero!
 export zeroRows!
 
 export PetscVec
+export GhostedPetscVec
 export setSize!
 export assemble!
 export viewVec
 export plusEquals!
 export zero!
+export copy!
 
 import Base.scale!
 

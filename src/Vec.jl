@@ -67,9 +67,6 @@ type GhostedPetscVec <: PetscVecBase
 
         ccall((:VecGetOwnershipRange, library), PetscErrorCode, (Vec, Ref{PetscInt}, Ref{PetscInt}), vec[], first, last)
 
-        println("first: ", first)
-        println("last: ", last)
-
         # +1 is for 1-based indexing
         new_vec = new(vec, true, false, Dict{PetscInt, PetscInt}(), first[]+1, last[], false)
 
@@ -366,7 +363,7 @@ function _getindices(vec::GhostedPetscVec, indices)
         if vec.first_local_index <= index && index <= vec.last_local_index # Within the local portion of the vector
             raw_indices[i] = (index - vec.first_local_index) + 1
         else # Within the ghosted part
-            raw_indices = vec.global_to_local_map[index]
+            raw_indices[i] = vec.global_to_local_map[index]
         end
     end
 

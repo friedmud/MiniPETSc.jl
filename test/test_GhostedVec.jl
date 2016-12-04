@@ -54,23 +54,32 @@
 
                 @test vec[7] == 2.9
             end
-        end
 
+            if MPI.Comm_rank(MPI.COMM_WORLD) == 0
+                vec = GhostedPetscVec([6,7], n_local=(Int32)(4))
+
+                # Test Ranged assignment
+                vec[1:2] = (Float64)[1 2]
+
+                assemble!(vec)
+
+                @test vec[1:2] == (Float64)[1,2]
+
+                # Test Array access to ghosts
+                @test vec[[1,6]] == [1,6]
+            else
+                vec = GhostedPetscVec([1,2], n_local=(Int32)(4))
+
+                # Test Ranged assignment
+                vec[6:7] = (Float64)[6 7]
+
+                assemble!(vec)
+
+                @test vec[6:7] == (Float64)[6,7]
+            end
+        end
     end
 
-    # begin
-    #     vec = GhostedPetscVec([], n_local=(Int32)(4))
-
-    #     @test vec.sized
-
-    #     # Test range assignment
-    #     vec[1:2] = (Float64)[1 2]
-
-    #     assemble!(vec)
-
-    #     @test size(vec) == (4)
-    #     @test vec[1:2] == (Float64)[1,2]
-    # end
 
     # begin
     #     vec = GhostedPetscVec([], n_local=(Int32)(4))

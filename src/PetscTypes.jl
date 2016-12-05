@@ -114,3 +114,13 @@ const KSPGCR = "gcr"
 
 
 typealias ISLocalToGlobalMapping Ptr{Void}
+
+typealias VecScatter Ptr{Void}
+
+typealias ScatterMode UInt32
+
+const SCATTER_FORWARD = (UInt32)(0)
+const SCATTER_REVERSE = (UInt32)(1)
+const SCATTER_FORWARD_LOCAL = (UInt32)(2)
+const SCATTER_REVERSE_LOCAL = (UInt32)(3)
+const SCATTER_LOCAL = (UInt32)(2)

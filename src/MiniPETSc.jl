@@ -33,6 +33,7 @@ export viewVec
 export plusEquals!
 export zero!
 export copy!
+export serializeToZero
 
 import Base.scale!
 

@@ -234,10 +234,7 @@ function copy!(vec::GhostedPetscVec, a::PetscVecBase)
     # 5. Call assemble!() to update ghosts
 
     # 1:
-    local_form = PetscVec()
-    ccall((:VecGhostGetLocalForm, library), PetscErrorCode, (Vec, Ref{Vec}), vec.vec[], local_form.vec)
-
-    local_and_ghosted_data_array = _getArray(local_form)
+    local_and_ghosted_data_array = _getArray(vec)
 
     # 2:
     src_local_array = _getArray(a)
@@ -246,17 +243,38 @@ function copy!(vec::GhostedPetscVec, a::PetscVecBase)
 
     # 3:
     for i in 1:length(src_local_array)
-        local_and_ghosted_data_array[i] = src_local_data_array[i]
+        local_and_ghosted_data_array[i] = src_local_array[i]
     end
 
     # 4:
     _restoreArray(a, src_local_array)
-    _restoreArray(vec, local_and_ghosted_data_array)
-
-    ccall((:VecGhostRestoreLocalForm, library), PetscErrorCode, (Vec, Ref{Vec}), vec.vec[], local_form.vec)
+    _restoreArray(vec)
 
     # 5:
     assemble!(vec)
+end
+
+"""
+    Serializes a parallel PETSc vec down into a Julia Array
+
+    Only returns the array on processor 0
+"""
+function serializeToZero(vec::PetscVecBase)
+    serialized_vec = PetscVec()
+    scatter = Ref{VecScatter}()
+
+    ccall((:VecScatterCreateToZero, library), PetscErrorCode, (Vec, Ref{VecScatter}, Ref{Vec}), vec.vec[], scatter, serialized_vec.vec)
+
+    ccall((:VecScatterBegin, library), PetscErrorCode, (VecScatter, Vec, Vec, InsertMode, ScatterMode), scatter[], vec.vec[], serialized_vec.vec[], INSERT_VALUES, SCATTER_FORWARD)
+    ccall((:VecScatterEnd, library), PetscErrorCode, (VecScatter, Vec, Vec, InsertMode, ScatterMode), scatter[], vec.vec[], serialized_vec.vec[], INSERT_VALUES, SCATTER_FORWARD)
+
+    # Have to copy the array because _getArray is reference memory that PETSc will destroy in a moment
+    serialized_array = copy(_getArray(serialized_vec))
+
+    ccall((:VecScatterDestroy, library), PetscErrorCode, (Ref{VecScatter},), scatter)
+    ccall((:VecDestroy, library), PetscErrorCode, (Ref{Vec},), serialized_vec.vec)
+
+    return serialized_array
 end
 
 #### AbstractArray Interface Definitions ###

@@ -11,7 +11,6 @@ const library = string(ENV["PETSC_DIR"],"/lib/libpetsc")
 include("PetscTypes.jl")
 
 function finalize()
-    println("Finalizing PETSc...")
     ccall((:PetscFinalize, library), PetscErrorCode, ())
 end
 

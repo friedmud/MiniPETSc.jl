@@ -4,7 +4,7 @@ module MiniPETSc
 
 using MPI
 
-const library = "/opt/moose/petsc/mpich_petsc-3.6.1/clang-opt-superlu/lib/libpetsc"
+const library = string(ENV["PETSC_DIR"],"/lib/libpetsc")
 
 include("PetscTypes.jl")
 

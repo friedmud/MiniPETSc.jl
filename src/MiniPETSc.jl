@@ -12,6 +12,7 @@ include("PetscTypes.jl")
 
 function finalize()
     ccall((:PetscFinalize, library), PetscErrorCode, ())
+    MPI.Finalize()
 end
 
 function __init__()

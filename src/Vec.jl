@@ -14,11 +14,30 @@ type PetscVec <: PetscVecBase
     " Whether or not the vector has ever been assembled (Note: the vector might currently NOT be assembled) "
     assembled::Bool
 
+    name::String
+
     function PetscVec()
+#        println("Creating PetscVec")
         vec = Ref{Vec}()
         ccall((:VecCreate, library), PetscErrorCode, (comm_type, Ref{Vec}), MPI.COMM_WORLD, vec)
         ccall((:VecSetType, library), PetscErrorCode, (Vec, VecType), vec[], VECMPI)
-        new(vec, false, false)
+        new_vec = new(vec, false, false, "")
+
+        function finalize(avec)
+#            ccall((:VecDestroy, library), PetscErrorCode, (Ref{Vec},), avec.vec)
+#            println(avec.name)
+        end
+
+        finalizer(new_vec, finalize)
+
+        return new_vec
+    end
+
+    function PetscVec(name::String)
+#        println("Creating ", name)
+        new_vec = PetscVec()
+        new_vec.name = name
+        return new_vec
     end
 end
 
@@ -260,7 +279,7 @@ end
     Only returns the array on processor 0
 """
 function serializeToZero(vec::PetscVecBase)
-    serialized_vec = PetscVec()
+    serialized_vec = PetscVec("serialized_vec")
     scatter = Ref{VecScatter}()
 
     ccall((:VecScatterCreateToZero, library), PetscErrorCode, (Vec, Ref{VecScatter}, Ref{Vec}), vec.vec[], scatter, serialized_vec.vec)
@@ -430,7 +449,7 @@ end
 """
 function _getArray(vec::GhostedPetscVec)
     if !vec.raw_array_present
-        vec.local_form = PetscVec()
+        vec.local_form = PetscVec("local_form")
         ccall((:VecGhostGetLocalForm, library), PetscErrorCode, (Vec, Ref{Vec}), vec.vec[], vec.local_form.vec)
 
         vec.raw_array = _getArray(vec.local_form)

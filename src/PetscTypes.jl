@@ -124,3 +124,11 @@ const SCATTER_REVERSE = (UInt32)(1)
 const SCATTER_FORWARD_LOCAL = (UInt32)(2)
 const SCATTER_REVERSE_LOCAL = (UInt32)(3)
 const SCATTER_LOCAL = (UInt32)(2)
+
+typealias NormType UInt32
+
+const NORM_1 = (UInt32)(0)
+const NORM_2 = (UInt32)(1)
+const NORM_FROBENIUS = (UInt32)(2)
+const NORM_INFINITY = (UInt32)(3)
+const NORM_1_AND_2 = (UInt32)(4)

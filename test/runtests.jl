@@ -1,7 +1,3 @@
-using MPI
-
-MPI.Init()
-
 using MiniPETSc
 
 using Base.Test
@@ -14,5 +10,3 @@ else
     include("test_GhostedVec.jl")
     include("test_parallel_Vec.jl")
 end
-
-MPI.Finalize()

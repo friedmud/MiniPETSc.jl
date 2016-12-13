@@ -212,6 +212,12 @@ function plusEquals!{T}(vec::PetscVecBase, v::Array{T}, i)
     plusEquals!(vec, (Float64)[(Float64)(val) for val in v], i)
 end
 
+"""
+    vec += v
+"""
+function plusEquals!(vec::PetscVecBase, v::PetscVecBase)
+    ccall((:VecAXPY, library), PetscErrorCode, (Vec, PetscScalar, Vec), vec.vec[], 1.0, v.vec[])
+end
 
 """
     vec = 0
@@ -271,6 +277,30 @@ function copy!(vec::GhostedPetscVec, a::PetscVecBase)
 
     # 5:
     assemble!(vec)
+end
+
+import Base.similar
+"""
+    Creates a PetscVec() with the same storage as the passed in vector
+"""
+function similar(vec::PetscVec)
+    new_vec = PetscVec()
+
+    ccall((:VecDuplicate, library), PetscErrorCode, (Vec, Ref{Vec}), vec.vec[], new_vec.vec)
+
+    return new_vec
+end
+
+import Base.norm
+"""
+    L2 Norm
+"""
+function norm(vec::PetscVecBase)
+    norm_value = Ref{PetscScalar}()
+
+    ccall((:VecNorm, library), PetscErrorCode, (Vec, NormType, Ref{PetscScalar}), vec.vec[], NORM_2, norm_value)
+
+    return norm_value[]
 end
 
 """
@@ -431,6 +461,7 @@ end
 
 
 ########## Private stuff
+
 """
     PRIVATE: Used internally.  Don't use.
 """
@@ -460,11 +491,17 @@ function _getArray(vec::GhostedPetscVec)
     return vec.raw_array
 end
 
+import Base.unsafe_convert
+
 """
     PRIVATE: Used internally.  Don't use.
 """
 function _restoreArray(vec::PetscVecBase, raw_data::Array{PetscScalar})
-    ccall((:VecRestoreArray, library), PetscErrorCode, (Vec, Ptr{PetscScalar}), vec.vec[], raw_data)
+    # This mess is required because PETSc is expecting a PetscScalar** and Julia won't automatically
+    # convert the array to that
+    pointer = Ref{Ptr{PetscScalar}}()
+    pointer[] = unsafe_convert(Ptr{PetscScalar}, raw_data)
+    ccall((:VecRestoreArray, library), PetscErrorCode, (Vec, Ref{Ptr{PetscScalar}}), vec.vec[], pointer)
 end
 
 """
